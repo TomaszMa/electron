@@ -696,6 +696,19 @@ AtomBrowserClient::CreateWindowForPictureInPicture(
 }
 #endif
 
+std::unique_ptr<content::LoginDelegate> AtomBrowserClient::CreateLoginDelegate(
+    const net::AuthChallengeInfo& auth_info,
+    content::WebContents* web_contents,
+    const content::GlobalRequestID& request_id,
+    bool is_request_for_main_frame,
+    const GURL& url,
+    scoped_refptr<net::HttpResponseHeaders> response_headers,
+    bool first_auth_attempt,
+    LoginAuthRequiredCallback auth_required_callback) {
+  return std::make_unique<AtomLoginDelegate>(auth_info, web_contents, url,
+                                             std::move(auth_required_callback));
+}
+
 void AtomBrowserClient::GetAdditionalAllowedSchemesForFileSystem(
     std::vector<std::string>* additional_schemes) {
   auto schemes_list = api::GetStandardSchemes();

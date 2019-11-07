@@ -10,7 +10,7 @@
 #include "base/memory/scoped_refptr.h"
 #include "base/observer_list_types.h"
 #include "build/build_config.h"
-#include "shell/browser/login_handler.h"
+#include "shell/browser/atom_login_delegate.h"
 
 namespace base {
 class DictionaryValue;
@@ -50,7 +50,7 @@ class BrowserObserver : public base::CheckedObserver {
   virtual void OnFinishLaunching(const base::DictionaryValue& launch_info) {}
 
   // The browser requests HTTP login.
-  virtual void OnLogin(scoped_refptr<LoginHandler> login_handler,
+  virtual void OnLogin(const AtomLoginDelegate::WeakPtr& login_delegate,
                        const base::DictionaryValue& request_details) {}
 
   // The browser's accessibility suppport has changed.

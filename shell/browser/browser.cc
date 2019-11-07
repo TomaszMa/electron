@@ -16,9 +16,9 @@
 #include "base/threading/thread_restrictions.h"
 #include "base/threading/thread_task_runner_handle.h"
 #include "shell/browser/atom_browser_main_parts.h"
+#include "shell/browser/atom_login_delegate.h"
 #include "shell/browser/atom_paths.h"
 #include "shell/browser/browser_observer.h"
-#include "shell/browser/login_handler.h"
 #include "shell/browser/native_window.h"
 #include "shell/browser/window_list.h"
 #include "shell/common/application_info.h"
@@ -182,10 +182,10 @@ void Browser::OnAccessibilitySupportChanged() {
 }
 
 void Browser::RequestLogin(
-    scoped_refptr<LoginHandler> login_handler,
+    const AtomLoginDelegate::WeakPtr& login_delegate,
     std::unique_ptr<base::DictionaryValue> request_details) {
   for (BrowserObserver& observer : observers_)
-    observer.OnLogin(login_handler, *(request_details.get()));
+    observer.OnLogin(login_delegate, *(request_details.get()));
 }
 
 void Browser::PreMainMessageLoopRun() {

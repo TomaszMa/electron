@@ -249,7 +249,7 @@ class Browser : public WindowListObserver {
   void OnAccessibilitySupportChanged();
 
   // Request basic auth login.
-  void RequestLogin(scoped_refptr<LoginHandler> login_handler,
+  void RequestLogin(const AtomLoginDelegate::WeakPtr& login_delegate,
                     std::unique_ptr<base::DictionaryValue> request_details);
 
   void PreMainMessageLoopRun();

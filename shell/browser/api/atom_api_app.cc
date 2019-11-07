@@ -38,8 +38,8 @@
 #include "shell/browser/api/gpuinfo_manager.h"
 #include "shell/browser/atom_browser_context.h"
 #include "shell/browser/atom_browser_main_parts.h"
+#include "shell/browser/atom_login_delegate.h"
 #include "shell/browser/atom_paths.h"
-#include "shell/browser/login_handler.h"
 #include "shell/browser/relauncher.h"
 #include "shell/common/application_info.h"
 #include "shell/common/atom_command_line.h"
@@ -495,13 +495,16 @@ void OnClientCertificateSelected(
   }
 }
 
-void PassLoginInformation(scoped_refptr<LoginHandler> login_handler,
+void PassLoginInformation(const AtomLoginDelegate::WeakPtr& login_delegate,
                           gin_helper::Arguments* args) {
+  if (!login_delegate)
+    return;
+
   base::string16 username, password;
   if (args->GetNext(&username) && args->GetNext(&password))
-    login_handler->Login(username, password);
+    login_delegate->Login(username, password);
   else
-    login_handler->CancelAuth();
+    login_delegate->CancelAuth();
 }
 
 #if defined(USE_NSS_CERTS)
@@ -667,23 +670,25 @@ void App::OnNewWindowForTab() {
 }
 #endif
 
-void App::OnLogin(scoped_refptr<LoginHandler> login_handler,
+void App::OnLogin(const AtomLoginDelegate::WeakPtr& login_delegate,
                   const base::DictionaryValue& request_details) {
+  if (!login_delegate)
+    return;
+
   v8::Locker locker(isolate());
   v8::HandleScope handle_scope(isolate());
   bool prevent_default = false;
-  content::WebContents* web_contents = login_handler->GetWebContents();
+  content::WebContents* web_contents = login_delegate->web_contents();
   if (web_contents) {
     prevent_default =
         Emit("login", WebContents::FromOrCreate(isolate(), web_contents),
-             request_details, *login_handler->auth_info(),
-             base::BindOnce(&PassLoginInformation,
-                            base::RetainedRef(login_handler)));
+             request_details, *login_delegate->auth_info(),
+             base::BindOnce(&PassLoginInformation, login_delegate));
   }
 
   // Default behavior is to always cancel the auth.
   if (!prevent_default)
-    login_handler->CancelAuth();
+    login_delegate->CancelAuth();
 }
 
 bool App::CanCreateWindow(
