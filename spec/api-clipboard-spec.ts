@@ -16,6 +16,12 @@ ifdescribe(process.platform !== 'win32' || process.arch !== 'arm64')('clipboard 
       const readImage = clipboard.readImage();
       expect(readImage.toDataURL()).to.equal(i.toDataURL());
     });
+    it('no image data in clipboard', async () => {
+      const text = 'abcd';
+      clipboard.writeText(text);
+      const readImage = clipboard.readImage();
+      expect(readImage.isEmpty()).to.equal(true);
+    });
   });
 
   describe('clipboard.readText()', () => {

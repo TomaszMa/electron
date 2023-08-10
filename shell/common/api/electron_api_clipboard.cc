@@ -221,26 +221,28 @@ void Clipboard::WriteBookmark(const std::u16string& title,
 
 gfx::Image Clipboard::ReadImage(gin_helper::Arguments* args) {
   ui::Clipboard* clipboard = ui::Clipboard::GetForCurrentThread();
-  absl::optional<gfx::Image> image;
 
-  base::RunLoop run_loop;
-  base::RepeatingClosure callback = run_loop.QuitClosure();
+  struct ClipboardImage : base::SupportsWeakPtr<ClipboardImage> {
+    gfx::Image image;
+  };
+  ClipboardImage clipboard_image;
+
   clipboard->ReadPng(
       GetClipboardBuffer(args),
       /* data_dst = */ nullptr,
       base::BindOnce(
-          [](absl::optional<gfx::Image>* image, base::RepeatingClosure cb,
+          [](base::WeakPtr<ClipboardImage> clipboard_image,
              const std::vector<uint8_t>& result) {
+            if (!clipboard_image)
+              return;
+
             SkBitmap bitmap;
             gfx::PNGCodec::Decode(result.data(), result.size(), &bitmap);
-            image->emplace(gfx::Image::CreateFrom1xBitmap(bitmap));
-            std::move(cb).Run();
+            clipboard_image->image = gfx::Image::CreateFrom1xBitmap(bitmap);
           },
-          &image, std::move(callback)));
-  run_loop.Run();
+          clipboard_image.AsWeakPtr()));
 
-  DCHECK(image.has_value());
-  return image.value();
+  return clipboard_image.image;
 }
 
 void Clipboard::WriteImage(const gfx::Image& image,
