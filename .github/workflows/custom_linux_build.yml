@@ -23,7 +23,7 @@ jobs:
         src: ${{ steps.filter.outputs.src }}
         build-image-sha: ${{ steps.set-output.outputs.build-image-sha }}
     steps:
-    - uses: actions/custom_checkout
+    - uses: actions/custom_checkout@cd8d5227737e930978080cd0818a50f19ea6ecfd #v4.0.2
     - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
       id: filter
       with:
@@ -56,7 +56,7 @@ jobs:
       build-image-sha: ${{ needs.setup.outputs.build-image-sha}}
     steps:
     - name: Checkout Electron
-      uses: actions/custom_checkout
+      uses: actions/custom_checkout@cd8d5227737e930978080cd0818a50f19ea6ecfd
       with:
         path: src/electron
         fetch-depth: 0
